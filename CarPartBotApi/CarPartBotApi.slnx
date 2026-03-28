@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="CarPartBotApi.Api/CarPartBotApi.Api.csproj" />
+  <Project Path="CarPartBotApi.Application/CarPartBotApi.Application.csproj" />
+  <Project Path="CarPartBotApi.Domain/CarPartBotApi.Domain.csproj" />
+  <Project Path="CarPartBotApi.Infrastructure/CarPartBotApi.Infrastructure.csproj" />
+</Solution>
