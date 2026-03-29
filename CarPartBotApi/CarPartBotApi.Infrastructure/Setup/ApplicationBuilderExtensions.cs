@@ -1,19 +1,22 @@
-﻿using CarPartBotApi.Domain.Interfaces.Clients;
+﻿using CarPartBotApi.Application.Configuration;
+using CarPartBotApi.Domain.Interfaces.Clients;
 using CarPartBotApi.Domain.Interfaces.Data;
 using CarPartBotApi.Infrastructure.Clients.Telegram;
-using CarPartBotApi.Infrastructure.Configuration;
 using CarPartBotApi.Infrastructure.Database;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Serilog;
 
 namespace CarPartBotApi.Infrastructure.Setup;
 
 public static class ApplicationBuilderExtensions
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, Action<InfrastructureConfigurationBuilder> options)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration, Action<InfrastructureConfigurationBuilder> options)
     {
-        AddConfiguration(services, options);
+        Log.Information("Configuring CarPartBotApi.Infrastructure services...");
+
+        AddConfiguration(services, configuration, options);
 
         // Database.
         services.AddDbContext<IApplicationDbContext, ApplicationDbContext>();
@@ -21,25 +24,23 @@ public static class ApplicationBuilderExtensions
         // Http clients.
         services.AddHttpClient<ITelegramClient, TelegramClient>((sp, client) =>
         {
-            var options = sp.GetRequiredService<IOptions<InfrastructureSettings>>();
+            var options = sp.GetRequiredService<IOptions<TelegramSettings>>();
 
-            var telegramSettings = options.Value.Telegram;
-
-            client.BaseAddress = new Uri($"{telegramSettings.ApiBaseUrl}/bot{telegramSettings.BotToken}", UriKind.Absolute);
+            client.BaseAddress = new Uri($"{options.Value.ApiBaseUrl}/bot{options.Value.BotToken}/", UriKind.Absolute);
         });
+        // TODO add logging handler.
+
+        Log.Information("CarPartBotApi.Infrastructure services configured.");
 
         return services;
     }
 
-    private static void AddConfiguration(IServiceCollection services, Action<InfrastructureConfigurationBuilder> options)
+    private static void AddConfiguration(IServiceCollection services, IConfiguration configuration, Action<InfrastructureConfigurationBuilder> options)
     {
         var configBuilder = new InfrastructureConfigurationBuilder();
         options(configBuilder);
 
-        if (configBuilder.Configuration is null)
-        {
-            throw new InvalidOperationException("Failed to setup CarPartBotApi.Infrastructure services: configuration is not provided.");
-        }
+        var infrastructureConfiguration = configuration.GetSection(InfrastructureSettings.SectionName);
 
         if (configBuilder.WebhookEndpointUrl is not null)
         {
@@ -48,12 +49,17 @@ public static class ApplicationBuilderExtensions
                 throw new ArgumentException("Failed to setup CarPartBotApi.Infrastructure services: WebhookEndpointUrl must be a valid relative URL if provided.");
             }
 
-            configBuilder.Configuration["WebhookEndpointUrl"] = configBuilder.WebhookEndpointUrl;
+            infrastructureConfiguration["WebhookEndpointUrl"] = configBuilder.WebhookEndpointUrl;
         }
 
         services
             .AddOptions<InfrastructureSettings>()
-            .Bind(configBuilder.Configuration)
+            .Bind(infrastructureConfiguration)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddOptions<TelegramSettings>()
+            .Bind(configuration.GetSection(TelegramSettings.SectionName))
             .ValidateDataAnnotations()
             .ValidateOnStart();
     }

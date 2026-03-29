@@ -7,15 +7,17 @@ using Utilities;
 
 namespace CarPartBotApi.Infrastructure.Clients.Abstractions;
 
-public abstract class BaseClient(ILogger _logger)
+public abstract class BaseClient(HttpClient _httpClient, ILogger _logger)
 {
     protected abstract JsonSerializerOptions SerializerOptions { get; }
+
+    protected readonly HttpClient HttpClient = _httpClient;
 
     protected readonly ILogger Logger = _logger;
 
     protected virtual async Task<Result<T>> HandleResponse<T>(
-        HttpResponseMessage message, 
-        CancellationToken ct, 
+        HttpResponseMessage message,
+        CancellationToken ct,
         [CallerMemberName] string? callerMethodName = null)
     {
         try
@@ -24,29 +26,29 @@ public abstract class BaseClient(ILogger _logger)
 
             if (response is not null)
             {
-                Logger.SuccessfulHttpCall(callerMethodName);
+                Logger.SuccessfulHttpCall(callerMethodName, (int)message.StatusCode);
 
                 return response;
             }
 
-            Logger.FailedToReadHttpResponse(callerMethodName);
+            Logger.FailedToReadHttpResponse(callerMethodName, (int)message.StatusCode);
 
             return Result<T>.Fail("Failed to read API response.");
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            Logger.FailedToReadHttpResponse(callerMethodName, ex);
+            Logger.FailedToReadHttpResponse(callerMethodName, (int)message.StatusCode, ex);
 
             return Result<T>.Fail("Failed to read API response.");
         }
     }
 
     protected virtual async Task<Result> HandleError<T>(
-        HttpResponseMessage message, 
+        HttpResponseMessage message,
         CancellationToken ct,
         [CallerMemberName] string? callerMethodName = null) where T : ErrorResponse
     {
-        string? rawResponse = null; 
+        string? rawResponse = null;
 
         try
         {
@@ -56,18 +58,18 @@ public abstract class BaseClient(ILogger _logger)
 
             if (response is not null)
             {
-                Logger.FailedHttpCall(callerMethodName, response.GetErrorMessage());
+                Logger.FailedHttpCall(callerMethodName, (int)message.StatusCode, response.GetErrorMessage());
 
                 return Result.Fail(response.GetErrorMessage());
             }
 
-            Logger.FailedToReadHttpErrorResponse(callerMethodName, rawResponse);
+            Logger.FailedToReadHttpErrorResponse(callerMethodName, (int)message.StatusCode, rawResponse);
 
             return Result<T>.Fail("Failed to read API response.");
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            Logger.FailedToReadHttpErrorResponse(callerMethodName, rawResponse, ex);
+            Logger.FailedToReadHttpErrorResponse(callerMethodName, (int)message.StatusCode, rawResponse, ex);
 
             return Result<T>.Fail("Failed to read API response.");
         }

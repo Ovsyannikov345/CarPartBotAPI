@@ -19,9 +19,11 @@
     <PackageReference Include="Npgsql" Version="10.0.2" />
     <PackageReference Include="Npgsql.DependencyInjection" Version="10.0.2" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
+    <PackageReference Include="Serilog" Version="4.3.1" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CarPartBotApi.Application\CarPartBotApi.Application.csproj" />
     <ProjectReference Include="..\CarPartBotApi.Domain\CarPartBotApi.Domain.csproj" />
   </ItemGroup>
 

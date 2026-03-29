@@ -1,7 +1,8 @@
-﻿using CarPartBotApi.Domain.Interfaces.Clients;
+﻿using CarPartBotApi.Application.Configuration;
+using CarPartBotApi.Domain.Interfaces.Clients;
 using CarPartBotApi.Infrastructure.Clients.Abstractions;
 using CarPartBotApi.Infrastructure.Clients.Telegram.Contracts;
-using CarPartBotApi.Infrastructure.Configuration;
+using CarPartBotApi.Infrastructure.Constants.Telegram;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Net.Http.Json;
@@ -13,9 +14,10 @@ namespace CarPartBotApi.Infrastructure.Clients.Telegram;
 
 public sealed class TelegramClient(
     HttpClient _httpClient,
-    IOptionsSnapshot<InfrastructureSettings> _options,
+    IOptionsSnapshot<InfrastructureSettings> _infrastructureOptions,
+    IOptionsSnapshot<TelegramSettings> _telegramOptions,
     ILogger<TelegramClient> _logger)
-    : BaseClient(_logger), ITelegramClient
+    : BaseClient(_httpClient, _logger), ITelegramClient
 {
     private const string WebhookRegistrationEndpointUrl = "setWebhook";
 
@@ -27,11 +29,22 @@ public sealed class TelegramClient(
 
     public async Task<Result> RegisterWebhook(CancellationToken ct)
     {
-        var webhookUrl = $"{_options.Value.ApiBaseUrl}/{_options.Value.WebhookEndpointUrl}";
+        if (_infrastructureOptions.Value.WebhookEndpointUrl is null)
+        {
+            return Result.Fail("Webhook URL is not configured.");
+        }
 
-        var request = new RegisterWebhookRequest { Url = webhookUrl };
+        var webhookUrl = $"{_infrastructureOptions.Value.ApiBaseUrl}/{_infrastructureOptions.Value.WebhookEndpointUrl}";
 
-        using var response = await _httpClient.PostAsJsonAsync(WebhookRegistrationEndpointUrl, request, SerializerOptions, ct);
+        var request = new RegisterWebhookRequest
+        {
+            Url = webhookUrl,
+            AllowedUpdates = [AllowedUpdateTypes.Message],
+            SecretToken = _telegramOptions.Value.Webhook.SecretToken,
+            MaxConnections = _telegramOptions.Value.Webhook.MaxConnections
+        };
+
+        using var response = await HttpClient.PostAsJsonAsync(WebhookRegistrationEndpointUrl, request, SerializerOptions, ct);
 
         if (response.IsSuccessStatusCode)
         {

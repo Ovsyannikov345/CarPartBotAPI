@@ -16,7 +16,7 @@ internal class TelegramWebhookRegistrationWorker(
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var currentPeriodInMinutes = _options.CurrentValue.WebhookRegistrationPeriodInMinutes;
+        var currentPeriodInMinutes = _options.CurrentValue.Webhook.RegistrationPeriodInMinutes;
 
         using var timer = new PeriodicTimer(TimeSpan.FromMinutes(currentPeriodInMinutes));
 
@@ -35,7 +35,7 @@ internal class TelegramWebhookRegistrationWorker(
                 _logger.FailedToRegisterTelegramWebhook(ex);
             }
 
-            var newPeriodInMinutes = _options.CurrentValue.WebhookRegistrationPeriodInMinutes;
+            var newPeriodInMinutes = _options.CurrentValue.Webhook.RegistrationPeriodInMinutes;
 
             if (newPeriodInMinutes != currentPeriodInMinutes)
             {

@@ -1,5 +1,6 @@
 ﻿using CarPartBotApi.Api.Constants;
 using CarPartBotApi.Api.Extensions;
+using CarPartBotApi.Api.Logging;
 using CarPartBotApi.Application.Configuration;
 using CarPartBotApi.Domain.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -12,8 +13,9 @@ namespace CarPartBotApi.Api.Contollers;
 [ApiController]
 [Route($"api/{WebhookConstants.WebhookControllerPath}")]
 public class WebhookController(
-    IOptionsSnapshot<TelegramSettings> _options,
-    ITelegramService _telegramService) 
+    ITelegramService _telegramService,
+    ILogger<WebhookController> _logger,
+    IOptionsSnapshot<TelegramSettings> _options) 
     : ControllerBase
 {
     // TODO add rate limiter
@@ -25,13 +27,15 @@ public class WebhookController(
 
         if (webhookSecretToken is null)
         {
-            // TODO log.
+            _logger.WebhookSecretTokenIsMissing();
+
             return Unauthorized(new { error = "Webhook secret token is missing." });
         }
 
-        if (_options.Value.WebhookSecretToken != webhookSecretToken)
+        if (_options.Value.Webhook.SecretToken != webhookSecretToken)
         {
-            // TODO log.
+            _logger.WebhookSecretTokenIsInvalid();
+
             return Unauthorized(new { error = "Webhook secret token is invalid." });
         }
 

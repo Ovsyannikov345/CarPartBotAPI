@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.Extensions.Options;
+using System.ComponentModel.DataAnnotations;
 
 namespace CarPartBotApi.Application.Configuration;
 
@@ -10,9 +11,26 @@ public sealed record TelegramSettings
     public required string AdminUsername { get; init; }
 
     [Required]
-    public required string WebhookSecretToken { get; init; }
+    [Url]
+    public required string ApiBaseUrl { get; init; }
+
+    [Required]
+    public required string BotToken { get; init; }
+
+    [Required]
+    [ValidateObjectMembers]
+    public required TelegramWebhookSettings Webhook { get; init; }
+}
+
+public sealed record TelegramWebhookSettings
+{
+    [Required]
+    public required string SecretToken { get; init; }
+
+    [Required]
+    public int MaxConnections { get; init; }
 
     [Required]
     [Range(0, int.MaxValue, MinimumIsExclusive = true)]
-    public int WebhookRegistrationPeriodInMinutes { get; init; }
+    public int RegistrationPeriodInMinutes { get; init; }
 }

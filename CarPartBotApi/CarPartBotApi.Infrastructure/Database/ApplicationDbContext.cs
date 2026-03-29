@@ -1,6 +1,6 @@
-﻿using CarPartBotApi.Domain.Entities;
+﻿using CarPartBotApi.Application.Configuration;
+using CarPartBotApi.Domain.Entities;
 using CarPartBotApi.Domain.Interfaces.Data;
-using CarPartBotApi.Infrastructure.Configuration;
 using CarPartBotApi.Infrastructure.Database.Configurations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -22,6 +22,6 @@ public class ApplicationDbContext(IOptionsSnapshot<InfrastructureSettings> _opti
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseNpgsql(_options.Value.ConnectionStrings.Posgres);
+        optionsBuilder.UseNpgsql(_options.Value.ConnectionStrings.Postgres);
     }
 }

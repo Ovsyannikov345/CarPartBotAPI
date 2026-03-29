@@ -4,6 +4,7 @@ using CarPartBotApi.Application.Services;
 using CarPartBotApi.Domain.Interfaces.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 namespace CarPartBotApi.Application.Setup;
 
@@ -11,6 +12,8 @@ public static class ApplicationBuilderExtensions
 {
     public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)
     {
+        Log.Information("Configuring CarPartBotApi.Application services...");
+
         // Configuration.
         services
             .AddOptions<TelegramSettings>()
@@ -23,6 +26,8 @@ public static class ApplicationBuilderExtensions
 
         // Background.
         services.AddHostedService<TelegramWebhookRegistrationWorker>();
+
+        Log.Information("CarPartBotApi.Application services configured.");
 
         return services;
     }
