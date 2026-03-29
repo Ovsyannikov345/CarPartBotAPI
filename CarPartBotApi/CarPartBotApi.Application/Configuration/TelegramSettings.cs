@@ -11,4 +11,8 @@ public sealed record TelegramSettings
 
     [Required]
     public required string WebhookSecretToken { get; init; }
+
+    [Required]
+    [Range(0, int.MaxValue, MinimumIsExclusive = true)]
+    public int WebhookRegistrationPeriodInMinutes { get; init; }
 }

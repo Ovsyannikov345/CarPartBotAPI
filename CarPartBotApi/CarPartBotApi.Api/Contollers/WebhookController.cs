@@ -10,14 +10,14 @@ using Microsoft.Extensions.Options;
 namespace CarPartBotApi.Api.Contollers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route($"api/{WebhookConstants.WebhookControllerPath}")]
 public class WebhookController(
     IOptionsSnapshot<TelegramSettings> _options,
     ITelegramService _telegramService) 
     : ControllerBase
 {
     // TODO add rate limiter
-    [HttpPost("telegram")]
+    [HttpPost(WebhookConstants.TelegramWebhookEndpointPath)]
     [AllowAnonymous]
     public async Task<IActionResult> ProcessTelegramWebhook(CancellationToken ct)
     {

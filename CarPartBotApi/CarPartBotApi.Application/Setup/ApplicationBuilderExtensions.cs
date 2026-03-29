@@ -1,4 +1,5 @@
-﻿using CarPartBotApi.Application.Configuration;
+﻿using CarPartBotApi.Application.Background;
+using CarPartBotApi.Application.Configuration;
 using CarPartBotApi.Application.Services;
 using CarPartBotApi.Domain.Interfaces.Services;
 using Microsoft.Extensions.Configuration;
@@ -19,6 +20,9 @@ public static class ApplicationBuilderExtensions
 
         // Services.
         services.AddScoped<ITelegramService, TelegramService>();
+
+        // Background.
+        services.AddHostedService<TelegramWebhookRegistrationWorker>();
 
         return services;
     }

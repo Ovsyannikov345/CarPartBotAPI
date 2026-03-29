@@ -1,5 +1,7 @@
+using CarPartBotApi.Api.Constants;
 using CarPartBotApi.Api.Setup;
 using CarPartBotApi.Application.Setup;
+using CarPartBotApi.Infrastructure.Configuration;
 using CarPartBotApi.Infrastructure.Setup;
 using Scalar.AspNetCore;
 
@@ -10,7 +12,9 @@ var configuration = builder.Configuration;
 builder.Services
     .AddApi()
     .AddApplication(configuration)
-    .AddInfrastructure(configuration);
+    .AddInfrastructure(options => options
+        .WithConfiguration(configuration.GetSection(InfrastructureSettings.SectionName))
+        .WithTelegramWebhookEndpoint($"{WebhookConstants.WebhookControllerPath}/{WebhookConstants.TelegramWebhookEndpointPath}"));
 
 var app = builder.Build();
 
