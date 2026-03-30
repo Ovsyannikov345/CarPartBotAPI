@@ -1,7 +1,9 @@
 using CarPartBotApi.Api.Constants;
 using CarPartBotApi.Api.Setup;
 using CarPartBotApi.Application.Setup;
+using CarPartBotApi.Infrastructure.Database;
 using CarPartBotApi.Infrastructure.Setup;
+using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Serilog;
 
@@ -34,6 +36,12 @@ try
 
     var app = builder.Build();
 
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        db.Database.Migrate();
+    }
+
     if (app.Environment.IsDevelopment())
     {
         app.MapOpenApi();
@@ -42,6 +50,8 @@ try
             options.WithTitle("API Reference");
         });
     }
+
+    // TODO add exception middleware.
 
     // TODO remove and provide custom solution.
     app.UseSerilogRequestLogging();
@@ -56,7 +66,7 @@ try
 
     app.Run();
 }
-catch (Exception ex)
+catch (Exception ex) when (ex is not HostAbortedException)
 {
     Log.Fatal(ex, "Application terminated unexpectedly.");
 }

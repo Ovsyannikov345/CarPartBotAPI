@@ -2,7 +2,7 @@
 using CarPartBotApi.Api.Extensions;
 using CarPartBotApi.Api.Logging;
 using CarPartBotApi.Application.Configuration;
-using CarPartBotApi.Domain.Interfaces.Services;
+using CarPartBotApi.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;

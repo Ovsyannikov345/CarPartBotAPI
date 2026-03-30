@@ -1,5 +1,5 @@
-﻿using CarPartBotApi.Application.Configuration;
-using CarPartBotApi.Domain.Interfaces.Clients;
+﻿using CarPartBotApi.Application.Clients.Telegram;
+using CarPartBotApi.Application.Configuration;
 using CarPartBotApi.Domain.Interfaces.Data;
 using CarPartBotApi.Infrastructure.Clients.Telegram;
 using CarPartBotApi.Infrastructure.Database;

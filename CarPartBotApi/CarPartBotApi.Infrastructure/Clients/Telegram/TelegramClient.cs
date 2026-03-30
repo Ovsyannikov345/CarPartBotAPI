@@ -1,7 +1,8 @@
-﻿using CarPartBotApi.Application.Configuration;
-using CarPartBotApi.Domain.Interfaces.Clients;
+﻿using CarPartBotApi.Application.Clients.Telegram;
+using CarPartBotApi.Application.Configuration;
 using CarPartBotApi.Infrastructure.Clients.Abstractions;
-using CarPartBotApi.Infrastructure.Clients.Telegram.Contracts;
+using CarPartBotApi.Infrastructure.Clients.Telegram.Contracts.RegisterWebhook;
+using CarPartBotApi.Infrastructure.Clients.Telegram.Contracts.SendMessage;
 using CarPartBotApi.Infrastructure.Constants.Telegram;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -20,6 +21,8 @@ public sealed class TelegramClient(
     : BaseClient(_httpClient, _logger), ITelegramClient
 {
     private const string WebhookRegistrationEndpointUrl = "setWebhook";
+
+    private const string SendMessageEndpointUrl = "sendMessage";
 
     protected override JsonSerializerOptions SerializerOptions => new JsonSerializerOptions
     {
@@ -45,6 +48,25 @@ public sealed class TelegramClient(
         };
 
         using var response = await HttpClient.PostAsJsonAsync(WebhookRegistrationEndpointUrl, request, SerializerOptions, ct);
+
+        if (response.IsSuccessStatusCode)
+        {
+            return Result.Succeed();
+        }
+
+        return await HandleError<RegisterWebhookErrorResponse>(response, ct);
+    }
+
+    public async Task<Result> SendMessage(long chatId, string text, CancellationToken ct)
+    {
+        var request = new SendMessageRequest
+        {
+            ChatId = chatId,
+            Text = text,
+            Entities = []
+        };
+
+        using var response = await HttpClient.PostAsJsonAsync(SendMessageEndpointUrl, request, SerializerOptions, ct);
 
         if (response.IsSuccessStatusCode)
         {

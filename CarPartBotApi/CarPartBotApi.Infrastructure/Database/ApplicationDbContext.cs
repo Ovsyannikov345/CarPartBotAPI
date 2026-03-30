@@ -24,4 +24,14 @@ public class ApplicationDbContext(IOptionsSnapshot<InfrastructureSettings> _opti
     {
         optionsBuilder.UseNpgsql(_options.Value.ConnectionStrings.Postgres);
     }
+
+    public IQueryable<T> Query<T>() where T : EntityBase
+    {
+        return Set<T>().AsQueryable();
+    }
+
+    void IApplicationDbContext.Add<T>(T entity)
+    {
+        Set<T>().Add(entity);
+    }
 }

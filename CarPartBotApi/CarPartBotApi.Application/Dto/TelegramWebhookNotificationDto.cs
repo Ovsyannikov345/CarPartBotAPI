@@ -13,6 +13,8 @@ public sealed record MessageDto
 
     public UserDto? From { get; init; }
 
+    public required ChatDto Chat { get; init; }
+
     public string? Text { get; init; }
 
     public List<MessageEntityDto>? Entities { get; init; }
@@ -30,6 +32,14 @@ public sealed record UserDto
 
     public string? LanguageCode { get; init; }
 }
+
+public sealed record ChatDto
+{
+    public required long Id { get; init; }
+
+    public required string Type { get; init; }
+}
+
 public sealed record MessageEntityDto
 {
     public required string Type { get; init; }

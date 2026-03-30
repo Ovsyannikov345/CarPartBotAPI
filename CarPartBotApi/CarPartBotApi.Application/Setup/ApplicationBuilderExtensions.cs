@@ -1,7 +1,7 @@
 ﻿using CarPartBotApi.Application.Background;
 using CarPartBotApi.Application.Configuration;
+using CarPartBotApi.Application.Handlers;
 using CarPartBotApi.Application.Services;
-using CarPartBotApi.Domain.Interfaces.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -23,6 +23,11 @@ public static class ApplicationBuilderExtensions
 
         // Services.
         services.AddScoped<ITelegramService, TelegramService>();
+
+        // Command handlers.
+        services
+            .AddScoped<ICommandHandler, StartCommandHandler>()
+            .AddScoped<ICommandHandler, HelpCommandHandler>();
 
         // Background.
         services.AddHostedService<TelegramWebhookRegistrationWorker>();

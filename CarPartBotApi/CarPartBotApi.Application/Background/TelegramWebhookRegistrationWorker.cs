@@ -1,6 +1,6 @@
-﻿using CarPartBotApi.Application.Configuration;
+﻿using CarPartBotApi.Application.Clients.Telegram;
+using CarPartBotApi.Application.Configuration;
 using CarPartBotApi.Application.Logging;
-using CarPartBotApi.Domain.Interfaces.Clients;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;

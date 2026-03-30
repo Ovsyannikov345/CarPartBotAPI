@@ -1,6 +1,6 @@
 ﻿using CarPartBotApi.Infrastructure.Clients.Abstractions;
 
-namespace CarPartBotApi.Infrastructure.Clients.Telegram.Contracts;
+namespace CarPartBotApi.Infrastructure.Clients.Telegram.Contracts.RegisterWebhook;
 
 internal sealed record RegisterWebhookErrorResponse : ErrorResponse
 {

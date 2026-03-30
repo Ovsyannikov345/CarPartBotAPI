@@ -1,4 +1,4 @@
-﻿namespace CarPartBotApi.Infrastructure.Clients.Telegram.Contracts;
+﻿namespace CarPartBotApi.Infrastructure.Clients.Telegram.Contracts.RegisterWebhook;
 
 internal sealed record RegisterWebhookRequest
 {

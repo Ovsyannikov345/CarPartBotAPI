@@ -8,7 +8,7 @@ public sealed record TelegramSettings
     public const string SectionName = "Telegram";
 
     [Required]
-    public required string AdminUsername { get; init; }
+    public long AdminExternalId { get; init; }
 
     [Required]
     [Url]

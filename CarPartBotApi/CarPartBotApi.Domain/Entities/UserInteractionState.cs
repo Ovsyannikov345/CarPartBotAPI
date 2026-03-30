@@ -13,5 +13,5 @@ public class UserInteractionState : EntityBase
 
     public Guid UserId { get; set; }
 
-    public required User User { get; set; }
+    public User User { get; set; } = null!;
 }
