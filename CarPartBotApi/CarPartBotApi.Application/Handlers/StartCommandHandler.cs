@@ -18,12 +18,17 @@ internal class StartCommandHandler(
     IOptionsSnapshot<TelegramSettings> _options)
     : CommandHandlerBase(_dbContext, _telegramClient), ICommandHandler
 {
+    public override string CommandName => CommandNames.Start;
+
+    public override string CommandDescription => CommandDescriptions.Start;
+
+    public override bool AdminOnly => false;
+
     public bool CanHandle(Command command)
     {
         return command.CommandName is CommandNames.Start;
     }
 
-    // TODO improve.
     public async Task<Result> Handle(Command command, UserContext userContext, ChatContext chatContext, CancellationToken ct)
     {
         var userLoadResult = await LoadUser(userContext, ct);
@@ -32,7 +37,7 @@ internal class StartCommandHandler(
         {
             return await Respond(
                 $"Happy to see you again, {userContext.FirstName}. You're already registered so feel free to write commands " +
-                $"or type /help to see the list of supported commands.",
+                $"or type /{CommandNames.Help} to see the list of supported commands.",
                 userContext,
                 chatContext,
                 ct);
@@ -58,10 +63,10 @@ internal class StartCommandHandler(
 
         // TODO app capabilities.
         return await Respond(
-                $"Nice to meet you, {userContext.FirstName}. You've been registered so feel free to write commands " +
-                $"or type /help to see the list of supported commands.",
-                userContext,
-                chatContext,
-                ct);
+            $"Nice to meet you, {userContext.FirstName}. You've been registered so feel free to write commands " +
+            $"or type /{CommandNames.Help} to see the list of supported commands.",
+            userContext,
+            chatContext,
+            ct);
     }
 }

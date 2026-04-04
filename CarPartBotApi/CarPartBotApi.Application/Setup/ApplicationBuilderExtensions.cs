@@ -1,6 +1,7 @@
 ﻿using CarPartBotApi.Application.Background;
 using CarPartBotApi.Application.Configuration;
 using CarPartBotApi.Application.Handlers;
+using CarPartBotApi.Application.Handlers.Admin;
 using CarPartBotApi.Application.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,6 +29,10 @@ public static class ApplicationBuilderExtensions
         services
             .AddScoped<ICommandHandler, StartCommandHandler>()
             .AddScoped<ICommandHandler, HelpCommandHandler>();
+
+        // Admin command handlers.
+        services
+            .AddScoped<ICommandHandler, GetUsersCommandHandler>();
 
         // Background.
         services.AddHostedService<TelegramWebhookRegistrationWorker>();
