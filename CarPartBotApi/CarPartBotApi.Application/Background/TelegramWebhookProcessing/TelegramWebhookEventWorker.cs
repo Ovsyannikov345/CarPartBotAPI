@@ -36,16 +36,16 @@ public sealed class TelegramWebhookEventWorker(
 
             if (processingResult.IsSuccess)
             {
-                _logger.ProcessedTelegramWebhookEvent();
+                _logger.ProcessedTelegramWebhookNotification();
             }
             else
             {
-                _logger.FailedToProcessTelegramWebhookEvent(processingResult.ErrorMessage);
+                _logger.FailedToProcessTelegramWebhookNotification(processingResult.ErrorMessage);
             }
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            _logger.FailedToProcessTelegramWebhookEvent(ex);
+            _logger.FailedToProcessTelegramWebhookNotification(ex);
         }
     }
 }

@@ -1,7 +1,8 @@
-﻿using CarPartBotApi.Application.Constants;
-using CarPartBotApi.Application.Handlers;
+﻿using CarPartBotApi.Application.CommandExecutionPipeline;
+using CarPartBotApi.Application.Constants;
+using CarPartBotApi.Application.Logging;
 using CarPartBotApi.Application.Utilities;
-using CarPartBotApi.Domain.Entities;
+using Microsoft.Extensions.Logging;
 using Utilities;
 
 namespace CarPartBotApi.Application.Services;
@@ -11,63 +12,50 @@ public interface ITelegramService
     public Task<Result> ProcessTelegramEvent(string rawNotification, CancellationToken ct);
 }
 
-// TODO add default handler
-// TODO add error handler
-internal class TelegramService(IEnumerable<ICommandHandler> commandHandlers) : ITelegramService
+internal class TelegramService(
+    ICommandExecutionPipelineBuilder _commandExecutionPipelineBuilder,
+    ILogger<TelegramService> _logger)
+    : ITelegramService
 {
     public async Task<Result> ProcessTelegramEvent(string rawNotification, CancellationToken ct)
     {
-        // TODO remove.
-        Console.WriteLine(rawNotification);
+        // TODO allow only one request per user (synchronize) to maintain proper interaction state.
 
         var readerCreationResult = TelegramWebhookReader.Create(rawNotification);
 
         if (readerCreationResult.IsFailure)
         {
-            // TODO log.
+            _logger.FailedToCreateWebhookReader(rawNotification);
+
             return readerCreationResult;
         }
 
         var reader = readerCreationResult.Value;
 
-        var userContext = reader.ExtractUserContext();
-
-        var chatContext = reader.ExtractChatContext();
-
-        if (chatContext.Type is not ChatTypes.Private)
-        {
-            return Result.Fail("Only private chats are supported.");
-        }
-
-        var commands = reader.GetCommands();
-
-        if (commands.Count > 0)
-        {
-            var command = commands.First();
-
-            var commandHandler = commandHandlers.FirstOrDefault(h => h.CanHandle(command));
-
-            if (commandHandler is null)
+        var commandExecutionPipeline = _commandExecutionPipelineBuilder
+            .WithDataReader(reader)
+            .WithValidator((telegramContextAccessor) =>
             {
-                // TODO handle.
-                Console.WriteLine("Handler is null");
-                return Result.Succeed();
-            }
+                if (telegramContextAccessor.ChatContext.Type is not ChatTypes.Private)
+                {
+                    return Result.Fail("Only private chats are supported");
+                }
 
-            var commandResult = await commandHandler.Handle(command, userContext, chatContext, ct);
-
-            if (commandResult.IsFailure)
-            {
-                // TODO handle
-                Console.WriteLine($"Failed to handle: {commandResult.ErrorMessage}");
                 return Result.Succeed();
-            }
-        }
-        else
+            })
+            .Build();
+
+        var executionResult = await commandExecutionPipeline.Execute(ct);
+
+        if (executionResult.IsFailure)
         {
-            // Delegate to message handlers
+            _logger.FailedToHandleTelegramWebhookEvent("Command execution pipeline has failed");
+
+            return Result.Fail("Failed to process received event");
         }
 
-        return Result.Succeed();
+        _logger.HandledTelegramWebhookEvent();
+
+        return executionResult;
     }
 }

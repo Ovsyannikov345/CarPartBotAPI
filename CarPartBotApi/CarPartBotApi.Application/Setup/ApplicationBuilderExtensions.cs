@@ -1,9 +1,11 @@
 ﻿using CarPartBotApi.Application.Accessors;
 using CarPartBotApi.Application.Background.TelegramWebhookProcessing;
 using CarPartBotApi.Application.Background.WebhookRegistration;
+using CarPartBotApi.Application.CommandExecutionPipeline;
 using CarPartBotApi.Application.Configuration;
 using CarPartBotApi.Application.Handlers;
 using CarPartBotApi.Application.Handlers.Admin;
+using CarPartBotApi.Application.Interfaces;
 using CarPartBotApi.Application.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,19 +27,23 @@ public static class ApplicationBuilderExtensions
             .ValidateOnStart();
 
         // Accessors.
-        services.AddScoped<ICorrelationIdAccessor, CorrelationIdAccessor>();
+        services
+            .AddScoped<ICorrelationIdAccessor, CorrelationIdAccessor>()
+            .AddScoped<ITelegramContextAccessor, TelegramContextAccessor>();
 
         // Services.
         services.AddScoped<ITelegramService, TelegramService>();
 
-        // Command handlers.
+        // Command handling.
+        services.AddScoped<ICommandExecutionPipelineBuilder, CommandExecutionPipelineBuilder>();
+
         services
             .AddScoped<ICommandHandler, StartCommandHandler>()
             .AddScoped<ICommandHandler, HelpCommandHandler>();
 
-        // Admin command handlers.
-        services
-            .AddScoped<ICommandHandler, GetUsersCommandHandler>();
+        services.AddScoped<ICommandHandler, GetUsersCommandHandler>();
+
+        services.AddScoped<IFailureHandler, FailureHandler>();
 
         // Background.
         services.AddHostedService<TelegramWebhookRegistrationWorker>();

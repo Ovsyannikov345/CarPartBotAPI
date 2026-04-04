@@ -1,6 +1,7 @@
 ﻿using CarPartBotApi.Application.Constants;
 using CarPartBotApi.Application.Contexts;
 using CarPartBotApi.Application.Dto;
+using CarPartBotApi.Application.Interfaces;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Utilities;
@@ -8,7 +9,7 @@ using Utilities;
 namespace CarPartBotApi.Application.Utilities;
 
 // TODO proper null handling.
-public sealed class TelegramWebhookReader
+public sealed class TelegramWebhookReader : ICommandDataReader
 {
     private static readonly JsonSerializerOptions DeserializationOptions = new()
     {

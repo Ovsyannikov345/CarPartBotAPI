@@ -1,8 +1,9 @@
-﻿using CarPartBotApi.Application.Clients.Telegram;
+﻿using CarPartBotApi.Application.Accessors;
+using CarPartBotApi.Application.Clients.Telegram;
 using CarPartBotApi.Application.Constants;
 using CarPartBotApi.Application.Constants.Enums;
-using CarPartBotApi.Application.Contexts;
 using CarPartBotApi.Application.Dto;
+using CarPartBotApi.Application.Interfaces;
 using CarPartBotApi.Domain.Entities;
 using CarPartBotApi.Domain.Interfaces.Data;
 using Microsoft.EntityFrameworkCore;
@@ -13,8 +14,10 @@ namespace CarPartBotApi.Application.Handlers.Admin;
 
 internal class GetUsersCommandHandler(
     IApplicationDbContext _dbContext,
-    ITelegramClient _telegramClient)
-    : CommandHandlerBase(_dbContext, _telegramClient), ICommandHandler
+    ITelegramClient _telegramClient,
+    ITelegramContextAccessor _telegramContextAccessor,
+    IFailureHandler _failureHandler)
+    : CommandHandlerBase(_dbContext, _telegramClient, _telegramContextAccessor), ICommandHandler
 {
     public override string CommandName => CommandNames.Users;
 
@@ -27,20 +30,20 @@ internal class GetUsersCommandHandler(
         return command.CommandName is CommandNames.Users;
     }
 
-    public async Task<Result> Handle(Command command, UserContext userContext, ChatContext chatContext, CancellationToken ct)
+    public async Task<Result> Handle(Command command, CancellationToken ct)
     {
-        var userLoadResult = await LoadUser(userContext, ct);
+        var userLoadResult = await LoadUser(ct);
 
         if (userLoadResult.IsFailure)
         {
-            return await HandleFailure(CommonHandlingFailureType.Unauthorized, userContext, chatContext, ct);
+            return await _failureHandler.Handle(HandlingFailureType.Unauthorized, ct);
         }
 
         var user = userLoadResult.Value;
 
         if (!user.IsAdmin)
         {
-            return await HandleFailure(CommonHandlingFailureType.ActionNotAllowed, userContext, chatContext, ct);
+            return await _failureHandler.Handle(HandlingFailureType.ActionNotAllowed, ct);
         }
 
         var users = await DbContext
@@ -60,6 +63,6 @@ internal class GetUsersCommandHandler(
                 $"Registration date: {registeredUser.CreatedAt}");
         }
 
-        return await Respond(sb.ToString(), userContext, chatContext, ct);
+        return await Respond(sb.ToString(), ct);
     }
 }

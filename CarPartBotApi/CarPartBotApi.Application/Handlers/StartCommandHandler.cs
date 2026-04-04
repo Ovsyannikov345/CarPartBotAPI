@@ -1,8 +1,9 @@
-﻿using CarPartBotApi.Application.Clients.Telegram;
+﻿using CarPartBotApi.Application.Accessors;
+using CarPartBotApi.Application.Clients.Telegram;
 using CarPartBotApi.Application.Configuration;
 using CarPartBotApi.Application.Constants;
-using CarPartBotApi.Application.Contexts;
 using CarPartBotApi.Application.Dto;
+using CarPartBotApi.Application.Interfaces;
 using CarPartBotApi.Domain.Constants.Enums;
 using CarPartBotApi.Domain.Entities;
 using CarPartBotApi.Domain.Interfaces.Data;
@@ -15,8 +16,9 @@ namespace CarPartBotApi.Application.Handlers;
 internal class StartCommandHandler(
     IApplicationDbContext _dbContext,
     ITelegramClient _telegramClient,
+    ITelegramContextAccessor _telegramContextAccessor,
     IOptionsSnapshot<TelegramSettings> _options)
-    : CommandHandlerBase(_dbContext, _telegramClient), ICommandHandler
+    : CommandHandlerBase(_dbContext, _telegramClient, _telegramContextAccessor), ICommandHandler
 {
     public override string CommandName => CommandNames.Start;
 
@@ -29,17 +31,17 @@ internal class StartCommandHandler(
         return command.CommandName is CommandNames.Start;
     }
 
-    public async Task<Result> Handle(Command command, UserContext userContext, ChatContext chatContext, CancellationToken ct)
+    public async Task<Result> Handle(Command command, CancellationToken ct)
     {
-        var userLoadResult = await LoadUser(userContext, ct);
+        var userContext = TelegramContextAccessor.UserContext;
+
+        var userLoadResult = await LoadUser(ct);
 
         if (userLoadResult.IsSuccess)
         {
             return await Respond(
                 $"Happy to see you again, {userContext.FirstName}. You're already registered so feel free to write commands " +
                 $"or type /{CommandNames.Help} to see the list of supported commands.",
-                userContext,
-                chatContext,
                 ct);
         }
 
@@ -65,8 +67,6 @@ internal class StartCommandHandler(
         return await Respond(
             $"Nice to meet you, {userContext.FirstName}. You've been registered so feel free to write commands " +
             $"or type /{CommandNames.Help} to see the list of supported commands.",
-            userContext,
-            chatContext,
             ct);
     }
 }

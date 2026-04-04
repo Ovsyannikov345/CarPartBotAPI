@@ -23,6 +23,6 @@ public class TelegramWebhookEventDispatcher(
             CorrelationId = _correlationIdAccessor.CorrelationId,
         }, ct);
 
-        _logger.EnqueuedTelegramWebhookEvent(rawPaylaod);
+        _logger.EnqueuedTelegramWebhookNotification(rawPaylaod);
     }
 }

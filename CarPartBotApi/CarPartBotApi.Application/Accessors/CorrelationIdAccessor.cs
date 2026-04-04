@@ -11,7 +11,7 @@ public class CorrelationIdAccessor : ICorrelationIdAccessor
 
     public string CorrelationId 
     { 
-        get => _correlationId ?? throw new ArgumentNullException(nameof(CorrelationId), "Correlation ID has not been set"); 
+        get => _correlationId ?? throw new InvalidOperationException("Correlation ID has not been set"); 
         set => _correlationId = value; 
     }
 }
