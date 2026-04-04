@@ -1,4 +1,5 @@
 using CarPartBotApi.Api.Constants;
+using CarPartBotApi.Api.Middleware;
 using CarPartBotApi.Api.Setup;
 using CarPartBotApi.Application.Setup;
 using CarPartBotApi.Infrastructure.Database;
@@ -20,7 +21,8 @@ try
     builder.Host.UseSerilog((context, services, configuration) => configuration
         .ReadFrom.Configuration(context.Configuration)
         .ReadFrom.Services(services)
-        .Enrich.FromLogContext());
+        .Enrich.FromLogContext()
+        .Enrich.WithProperty("Application", "CarPartBotApi"));
 
     var configuration = builder.Configuration;
 
@@ -52,6 +54,9 @@ try
     }
 
     // TODO add exception middleware.
+
+    
+    app.UseCorrelationIdMiddleware();
 
     // TODO remove and provide custom solution.
     app.UseSerilogRequestLogging();

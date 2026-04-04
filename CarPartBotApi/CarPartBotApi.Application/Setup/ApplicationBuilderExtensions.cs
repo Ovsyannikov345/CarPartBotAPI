@@ -1,4 +1,5 @@
-﻿using CarPartBotApi.Application.Background.TelegramWebhookProcessing;
+﻿using CarPartBotApi.Application.Accessors;
+using CarPartBotApi.Application.Background.TelegramWebhookProcessing;
 using CarPartBotApi.Application.Background.WebhookRegistration;
 using CarPartBotApi.Application.Configuration;
 using CarPartBotApi.Application.Handlers;
@@ -22,6 +23,9 @@ public static class ApplicationBuilderExtensions
             .Bind(configuration.GetSection(TelegramSettings.SectionName))
             .ValidateDataAnnotations()
             .ValidateOnStart();
+
+        // Accessors.
+        services.AddScoped<ICorrelationIdAccessor, CorrelationIdAccessor>();
 
         // Services.
         services.AddScoped<ITelegramService, TelegramService>();

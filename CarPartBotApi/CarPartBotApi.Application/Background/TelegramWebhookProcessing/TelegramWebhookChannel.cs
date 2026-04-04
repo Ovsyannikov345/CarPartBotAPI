@@ -1,4 +1,5 @@
-﻿using System.Threading.Channels;
+﻿using CarPartBotApi.Application.Background.Abstractions;
+using System.Threading.Channels;
 
 namespace CarPartBotApi.Application.Background.TelegramWebhookProcessing;
 
@@ -33,4 +34,7 @@ public sealed class TelegramWebhookChannel
     }
 }
 
-public sealed record TelegramWebhookMessage(string RawPayload);
+public sealed record TelegramWebhookMessage : MessageBase
+{
+    public required string RawPayload { get; init; }
+}

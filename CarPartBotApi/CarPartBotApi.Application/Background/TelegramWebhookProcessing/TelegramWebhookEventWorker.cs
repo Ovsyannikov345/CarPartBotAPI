@@ -3,6 +3,7 @@ using CarPartBotApi.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog.Context;
 
 namespace CarPartBotApi.Application.Background.TelegramWebhookProcessing;
 
@@ -16,9 +17,12 @@ public sealed class TelegramWebhookEventWorker(
     {
         await foreach (var message in _queueReader.ReadAll(stoppingToken))
         {
-            await using var scope = _serviceProvider.CreateAsyncScope();
+            using (LogContext.PushProperty("CorrelationId", message.CorrelationId))
+            {
+                await using var scope = _serviceProvider.CreateAsyncScope();
 
-            await ProcessMessage(scope, message, stoppingToken);
+                await ProcessMessage(scope, message, stoppingToken);
+            }
         }
     }
 
