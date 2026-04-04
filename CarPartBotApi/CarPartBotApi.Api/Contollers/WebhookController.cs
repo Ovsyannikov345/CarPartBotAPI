@@ -1,8 +1,8 @@
 ﻿using CarPartBotApi.Api.Constants;
 using CarPartBotApi.Api.Extensions;
 using CarPartBotApi.Api.Logging;
+using CarPartBotApi.Application.Background.TelegramWebhookProcessing;
 using CarPartBotApi.Application.Configuration;
-using CarPartBotApi.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -13,7 +13,7 @@ namespace CarPartBotApi.Api.Contollers;
 [ApiController]
 [Route($"api/{WebhookConstants.WebhookControllerPath}")]
 public class WebhookController(
-    ITelegramService _telegramService,
+    ITelegramWebhookEventDispatcher _telegramWebhookEventDispatcher,
     ILogger<WebhookController> _logger,
     IOptionsSnapshot<TelegramSettings> _options) 
     : ControllerBase
@@ -40,8 +40,7 @@ public class WebhookController(
 
         var rawBody = await HttpContext.ReadRequestBodyAsStringAsync(ct);
 
-        // TODO process asynchronously.
-        await _telegramService.ProcessTelegramEvent(rawBody, ct);
+        await _telegramWebhookEventDispatcher.EnqueueForProcessing(rawBody, ct);
 
         return Ok();
     }

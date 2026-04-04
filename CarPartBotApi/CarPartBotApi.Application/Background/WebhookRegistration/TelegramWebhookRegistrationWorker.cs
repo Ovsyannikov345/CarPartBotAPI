@@ -6,7 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace CarPartBotApi.Application.Background;
+namespace CarPartBotApi.Application.Background.WebhookRegistration;
 
 internal class TelegramWebhookRegistrationWorker(
     IServiceScopeFactory _serviceScopeFactory,

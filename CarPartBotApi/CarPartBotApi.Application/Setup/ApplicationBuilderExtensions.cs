@@ -1,4 +1,5 @@
-﻿using CarPartBotApi.Application.Background;
+﻿using CarPartBotApi.Application.Background.TelegramWebhookProcessing;
+using CarPartBotApi.Application.Background.WebhookRegistration;
 using CarPartBotApi.Application.Configuration;
 using CarPartBotApi.Application.Handlers;
 using CarPartBotApi.Application.Handlers.Admin;
@@ -36,6 +37,13 @@ public static class ApplicationBuilderExtensions
 
         // Background.
         services.AddHostedService<TelegramWebhookRegistrationWorker>();
+
+        services
+            .AddScoped<ITelegramWebhookEventDispatcher, TelegramWebhookEventDispatcher>()
+            .AddSingleton<TelegramWebhookChannel>()
+            .AddSingleton<ITelegramWebhookEventWriter>((sp) => sp.GetRequiredService<TelegramWebhookChannel>())
+            .AddSingleton<ITelegramWebhookEventReader>((sp) => sp.GetRequiredService<TelegramWebhookChannel>())
+            .AddHostedService<TelegramWebhookEventWorker>();
 
         Log.Information("CarPartBotApi.Application services configured.");
 
