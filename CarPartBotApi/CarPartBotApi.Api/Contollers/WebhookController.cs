@@ -18,7 +18,6 @@ public class WebhookController(
     IOptionsSnapshot<TelegramSettings> _options) 
     : ControllerBase
 {
-    // TODO add rate limiter
     [HttpPost(WebhookConstants.TelegramWebhookEndpointPath)]
     [AllowAnonymous]
     public async Task<IActionResult> ProcessTelegramWebhook(CancellationToken ct)
