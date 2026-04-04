@@ -53,10 +53,9 @@ try
         });
     }
 
-    // TODO add exception middleware.
-
-    
     app.UseCorrelationIdMiddleware();
+
+    app.UseExceptionHandlingMiddleware();
 
     // TODO remove and provide custom solution.
     app.UseSerilogRequestLogging();

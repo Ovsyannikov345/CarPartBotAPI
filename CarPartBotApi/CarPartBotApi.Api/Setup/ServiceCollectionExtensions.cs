@@ -1,4 +1,6 @@
 ﻿using Serilog;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 
 namespace CarPartBotApi.Api.Setup;
@@ -9,7 +11,14 @@ public static class ServiceCollectionExtensions
     {
         Log.Information("Configuring CarPartBotApi.API services...");
 
-        services.AddControllers();
+        services
+            .AddControllers()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+            });
+
         services.AddOpenApi();
 
         services.AddRateLimiter(options =>
