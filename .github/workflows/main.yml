@@ -24,15 +24,15 @@ jobs:
 
       # 3. Restore dependencies
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore ./CarPartBotApi/CarPartBotApi.Api.csproj
 
       # 4. Build the application
       - name: Build
-        run: dotnet build --no-restore --configuration Release
+        run: dotnet build ./CarPartBotApi/CarPartBotApi.Api.csproj --no-restore --configuration Release
 
       # 5. Run tests
       - name: Test
-        run: dotnet test --no-build --configuration Release --verbosity normal
+        run: dotnet test ./CarPartBotApi/CarPartBotApi.Api.csproj --no-build --configuration Release --verbosity normal
 
       # 6. Set up Docker Buildx
       - name: Set up Docker Buildx
@@ -65,7 +65,7 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: .
-          file: Dockerfile
+          file: CarPartBotApi/Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
