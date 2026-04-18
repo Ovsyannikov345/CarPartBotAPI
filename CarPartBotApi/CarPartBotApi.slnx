@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".dockerignore" />
+    <File Path="Dockerfile" />
+  </Folder>
   <Project Path="CarPartBotApi.Api/CarPartBotApi.Api.csproj" />
   <Project Path="CarPartBotApi.Application/CarPartBotApi.Application.csproj" />
   <Project Path="CarPartBotApi.Domain/CarPartBotApi.Domain.csproj" />
