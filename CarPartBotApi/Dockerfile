@@ -2,6 +2,12 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 USER app
 WORKDIR /app
 
+USER root
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+USER app
+WORKDIR /app
+
 EXPOSE 5127
 ENV ASPNETCORE_HTTP_PORTS=5127
 
