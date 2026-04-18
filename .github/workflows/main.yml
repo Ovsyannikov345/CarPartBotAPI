@@ -24,15 +24,15 @@ jobs:
 
       # 3. Restore dependencies
       - name: Restore dependencies
-        run: dotnet restore ./CarPartBotApi/CarPartBotApi.Api.csproj
+        run: dotnet restore ./CarPartBotApi/CarPartBotApi.Api/CarPartBotApi.Api.csproj
 
       # 4. Build the application
       - name: Build
-        run: dotnet build ./CarPartBotApi/CarPartBotApi.Api.csproj --no-restore --configuration Release
+        run: dotnet build ./CarPartBotApi/CarPartBotApi.Api/CarPartBotApi.Api.csproj --no-restore --configuration Release
 
       # 5. Run tests
       - name: Test
-        run: dotnet test ./CarPartBotApi/CarPartBotApi.Api.csproj --no-build --configuration Release --verbosity normal
+        run: dotnet test ./CarPartBotApi/CarPartBotApi.Api/CarPartBotApi.Api.csproj --no-build --configuration Release --verbosity normal
 
       # 6. Set up Docker Buildx
       - name: Set up Docker Buildx
