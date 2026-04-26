@@ -1,43 +1,45 @@
 ﻿using CarPartBotApi.Application.Accessors;
 using CarPartBotApi.Application.Clients.Telegram;
+using CarPartBotApi.Application.CommandExecutionPipeline.Abstractions;
 using CarPartBotApi.Application.Configuration;
 using CarPartBotApi.Application.Constants;
+using CarPartBotApi.Application.Constants.Enums;
 using CarPartBotApi.Application.Dto;
 using CarPartBotApi.Application.Interfaces;
-using CarPartBotApi.Domain.Constants.Enums;
 using CarPartBotApi.Domain.Entities;
 using CarPartBotApi.Domain.Interfaces.Data;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 using Utilities;
 
-namespace CarPartBotApi.Application.Handlers;
+namespace CarPartBotApi.Application.CommandExecutionPipeline.Handlers;
 
 internal class StartCommandHandler(
     IApplicationDbContext _dbContext,
     ITelegramClient _telegramClient,
     ITelegramContextAccessor _telegramContextAccessor,
+    IFailureHandler _failureHandler,
     IOptionsSnapshot<TelegramSettings> _options)
-    : CommandHandlerBase(_dbContext, _telegramClient, _telegramContextAccessor), ICommandHandler
+    : CommandHandler<EmptyCommandState>(_dbContext, _telegramClient, _telegramContextAccessor, _failureHandler)
 {
     public override string CommandName => CommandNames.Start;
 
     public override string CommandDescription => CommandDescriptions.Start;
 
-    public override bool AdminOnly => false;
+    public override CommandAccessLevel CommandAccessLevel => CommandAccessLevel.Anonymous;
 
-    public bool CanHandle(Command command)
+    public override CommandType CommandType => CommandType.Start;
+
+    public override bool CanHandle(Command command)
     {
-        return command.CommandName is CommandNames.Start;
+        return command.CommandName == CommandName;
     }
 
-    public async Task<Result> Handle(Command command, CancellationToken ct)
+    protected override async Task<Result> Execute(Command command, CancellationToken ct)
     {
         var userContext = TelegramContextAccessor.UserContext;
 
-        var userLoadResult = await LoadUser(ct);
-
-        if (userLoadResult.IsSuccess)
+        if (IsAuthorized)
         {
             return await Respond(
                 $"Happy to see you again, {userContext.FirstName}. You're already registered so feel free to write commands " +
@@ -53,9 +55,7 @@ internal class StartCommandHandler(
             CreatedAt = DateTime.UtcNow,
             UserInteractionState = new UserInteractionState
             {
-                ActionType = ActionType.None,
-                ActionStep = ActionStep.None,
-                ActionState = JsonDocument.Parse("{}"),
+                ActionState = JsonSerializer.Serialize(new EmptyCommandState(), StateSerializerOptions),
                 CreatedAt = DateTime.UtcNow
             }
         };

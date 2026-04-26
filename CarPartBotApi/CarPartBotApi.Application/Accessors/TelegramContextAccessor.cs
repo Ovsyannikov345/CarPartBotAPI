@@ -10,6 +10,10 @@ public interface ITelegramContextAccessor
     public UserContext UserContext { get; set; }
 
     public IReadOnlyList<Command> Commands { get; set; }
+
+    public string? Message { get; set; }
+
+    public TelegramCallbackQuery? CallbackQuery { get; set; }
 }
 
 public sealed class TelegramContextAccessor : ITelegramContextAccessor
@@ -31,4 +35,8 @@ public sealed class TelegramContextAccessor : ITelegramContextAccessor
     }
 
     public IReadOnlyList<Command> Commands { get; set; } = [];
+
+    public string? Message { get; set; }
+
+    public TelegramCallbackQuery? CallbackQuery { get; set; }
 }

@@ -1,6 +1,7 @@
 ﻿using CarPartBotApi.Application.Accessors;
-using CarPartBotApi.Application.Handlers;
+using CarPartBotApi.Application.CommandExecutionPipeline.Abstractions;
 using CarPartBotApi.Application.Interfaces;
+using CarPartBotApi.Domain.Interfaces.Data;
 using Microsoft.Extensions.Logging;
 using Utilities;
 
@@ -16,8 +17,10 @@ public interface ICommandExecutionPipelineBuilder
 }
 
 public sealed class CommandExecutionPipelineBuilder(
+    IApplicationDbContext _dbContext,
     ITelegramContextAccessor _telegramContextAccessor,
     IEnumerable<ICommandHandler> _commandHandlers,
+    IEnumerable<ICallbackableHandler> _callbackHandlers,
     IFailureHandler _failureHandler,
     ILogger<CommandExecutionPipeline> _pipelineLogger)
     : ICommandExecutionPipelineBuilder
@@ -50,7 +53,9 @@ public sealed class CommandExecutionPipelineBuilder(
         _telegramContextAccessor.UserContext = _commandDataReader.ExtractUserContext();
         _telegramContextAccessor.ChatContext = _commandDataReader.ExtractChatContext();
         _telegramContextAccessor.Commands = _commandDataReader.GetCommands();
+        _telegramContextAccessor.Message = _commandDataReader.GetMessageText();
+        _telegramContextAccessor.CallbackQuery = _commandDataReader.GetCallbackQuery();
 
-        return new CommandExecutionPipeline(_telegramContextAccessor, _validators, _commandHandlers, _failureHandler, _pipelineLogger);
+        return new CommandExecutionPipeline(_dbContext, _telegramContextAccessor, _validators, _commandHandlers, _callbackHandlers, _failureHandler, _pipelineLogger);
     }
 }

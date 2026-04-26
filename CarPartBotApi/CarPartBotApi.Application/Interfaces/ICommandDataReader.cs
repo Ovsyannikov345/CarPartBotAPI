@@ -11,7 +11,9 @@ public interface ICommandDataReader
 
     public List<Command> GetCommands();
 
-    public string GetMessageText();
+    public string? GetMessageText();
 
     public bool HasCommands();
+
+    public TelegramCallbackQuery? GetCallbackQuery();
 }

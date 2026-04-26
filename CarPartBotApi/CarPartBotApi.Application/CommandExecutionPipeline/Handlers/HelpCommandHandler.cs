@@ -1,16 +1,16 @@
 ﻿using CarPartBotApi.Application.Accessors;
 using CarPartBotApi.Application.Clients.Telegram;
+using CarPartBotApi.Application.CommandExecutionPipeline.Abstractions;
 using CarPartBotApi.Application.Constants;
 using CarPartBotApi.Application.Constants.Enums;
 using CarPartBotApi.Application.Dto;
 using CarPartBotApi.Application.Interfaces;
 using CarPartBotApi.Domain.Interfaces.Data;
 using Microsoft.Extensions.DependencyInjection;
-using System.Data;
 using System.Text;
 using Utilities;
 
-namespace CarPartBotApi.Application.Handlers;
+namespace CarPartBotApi.Application.CommandExecutionPipeline.Handlers;
 
 public sealed class HelpCommandHandler(
     IApplicationDbContext _dbContext,
@@ -18,29 +18,24 @@ public sealed class HelpCommandHandler(
     IServiceProvider _serviceProvider,
     ITelegramContextAccessor _telegramContextAccessor,
     IFailureHandler _failureHandler)
-    : CommandHandlerBase(_dbContext, _telegramClient, _telegramContextAccessor), ICommandHandler
+    : CommandHandler<EmptyCommandState>(_dbContext, _telegramClient, _telegramContextAccessor, _failureHandler)
 {
     public override string CommandName => CommandNames.Help;
 
     public override string CommandDescription => CommandDescriptions.Help;
 
-    public override bool AdminOnly => false;
+    public override CommandAccessLevel CommandAccessLevel => CommandAccessLevel.AuthorizedUsersOnly;
 
-    public bool CanHandle(Command command)
+    public override CommandType CommandType => CommandType.Help;
+
+    public override bool CanHandle(Command command)
     {
-        return command.CommandName is CommandNames.Help;
+        return command.CommandName == CommandName;
     }
 
-    public async Task<Result> Handle(Command command, CancellationToken ct)
+    protected override async Task<Result> Execute(Command command, CancellationToken ct)
     {
-        var userLoadResult = await LoadUser(ct);
-
-        if (userLoadResult.IsFailure)
-        {
-            return await _failureHandler.Handle(HandlingFailureType.Unauthorized, ct);
-        }
-
-        var user = userLoadResult.Value;
+        var user = GetUser();
 
         var commandHandlers = _serviceProvider
             .GetServices<ICommandHandler>()
@@ -48,7 +43,7 @@ public sealed class HelpCommandHandler(
 
         if (!user.IsAdmin)
         {
-            commandHandlers = commandHandlers.Where(handler => handler.AdminOnly == false);
+            commandHandlers = commandHandlers.Where(handler => handler.CommandAccessLevel is not CommandAccessLevel.AdminUserOnly);
         }
 
         var sb = new StringBuilder("Here's the list of available commands:\n");

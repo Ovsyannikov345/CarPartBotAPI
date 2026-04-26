@@ -7,7 +7,7 @@ using CarPartBotApi.Application.Logging;
 using Microsoft.Extensions.Logging;
 using Utilities;
 
-namespace CarPartBotApi.Application.Handlers;
+namespace CarPartBotApi.Application.CommandExecutionPipeline.Handlers;
 
 public sealed class FailureHandler(
     ITelegramClient _telegramClient,

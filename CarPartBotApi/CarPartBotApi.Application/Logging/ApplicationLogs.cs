@@ -68,8 +68,21 @@ public static partial class ApplicationLogs
     [LoggerMessage(EventId = 1_005_002, Level = LogLevel.Error, Message = "Failed to gracefully handle failure.")]
     public static partial void FailedToGracefullyHandleFailure(this ILogger logger, Exception exception);
 
-    [LoggerMessage(EventId = 1_005_002, Level = LogLevel.Information, Message = "Failure handled gracefully. Failure type: {FailureType}.")]
+    [LoggerMessage(EventId = 1_005_003, Level = LogLevel.Information, Message = "Failure handled gracefully. Failure type: {FailureType}.")]
     public static partial void FailureHandledGracefully(this ILogger logger, HandlingFailureType failureType);
+
+    #endregion
+
+    #region Bot metadata updating
+
+    [LoggerMessage(EventId = 1_006_001, Level = LogLevel.Information, Message = "Telegram bot metadata updated successfully.")]
+    public static partial void TelegramBotMetadataUpdated(this ILogger logger);
+
+    [LoggerMessage(EventId = 1_006_002, Level = LogLevel.Error, Message = "Failed to update telegram bot metadata. Reason: {Reason}.")]
+    public static partial void FailedToUpdateTelegramBotMetadata(this ILogger logger, string reason);
+
+    [LoggerMessage(EventId = 1_006_003, Level = LogLevel.Error, Message = "Failed to update telegram bot metadata.")]
+    public static partial void FailedToUpdateTelegramBotMetadata(this ILogger logger, Exception exception);
 
     #endregion
 }

@@ -1,5 +1,6 @@
 ﻿using CarPartBotApi.Application.Accessors;
 using CarPartBotApi.Application.Clients.Telegram;
+using CarPartBotApi.Application.CommandExecutionPipeline.Abstractions;
 using CarPartBotApi.Application.Constants;
 using CarPartBotApi.Application.Constants.Enums;
 using CarPartBotApi.Application.Dto;
@@ -10,42 +11,30 @@ using Microsoft.EntityFrameworkCore;
 using System.Text;
 using Utilities;
 
-namespace CarPartBotApi.Application.Handlers.Admin;
+namespace CarPartBotApi.Application.CommandExecutionPipeline.Handlers.Admin;
 
-internal class GetUsersCommandHandler(
+public class GetUsersCommandHandler(
     IApplicationDbContext _dbContext,
     ITelegramClient _telegramClient,
     ITelegramContextAccessor _telegramContextAccessor,
     IFailureHandler _failureHandler)
-    : CommandHandlerBase(_dbContext, _telegramClient, _telegramContextAccessor), ICommandHandler
+    : CommandHandler<EmptyCommandState>(_dbContext, _telegramClient, _telegramContextAccessor, _failureHandler)
 {
     public override string CommandName => CommandNames.Users;
 
     public override string CommandDescription => CommandDescriptions.Users;
 
-    public override bool AdminOnly => true;
+    public override CommandAccessLevel CommandAccessLevel => CommandAccessLevel.AdminUserOnly;
 
-    public bool CanHandle(Command command)
+    public override CommandType CommandType => CommandType.GetUsers;
+
+    public override bool CanHandle(Command command)
     {
-        return command.CommandName is CommandNames.Users;
+        return command.CommandName == CommandName;
     }
 
-    public async Task<Result> Handle(Command command, CancellationToken ct)
+    protected override async Task<Result> Execute(Command command, CancellationToken ct)
     {
-        var userLoadResult = await LoadUser(ct);
-
-        if (userLoadResult.IsFailure)
-        {
-            return await _failureHandler.Handle(HandlingFailureType.Unauthorized, ct);
-        }
-
-        var user = userLoadResult.Value;
-
-        if (!user.IsAdmin)
-        {
-            return await _failureHandler.Handle(HandlingFailureType.ActionNotAllowed, ct);
-        }
-
         var users = await DbContext
             .Query<User>()
             .AsNoTracking()

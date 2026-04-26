@@ -1,10 +1,12 @@
 ﻿using CarPartBotApi.Application.Accessors;
+using CarPartBotApi.Application.Background.BotMetadataUpdate;
 using CarPartBotApi.Application.Background.TelegramWebhookProcessing;
 using CarPartBotApi.Application.Background.WebhookRegistration;
 using CarPartBotApi.Application.CommandExecutionPipeline;
+using CarPartBotApi.Application.CommandExecutionPipeline.Abstractions;
+using CarPartBotApi.Application.CommandExecutionPipeline.Handlers;
+using CarPartBotApi.Application.CommandExecutionPipeline.Handlers.Admin;
 using CarPartBotApi.Application.Configuration;
-using CarPartBotApi.Application.Handlers;
-using CarPartBotApi.Application.Handlers.Admin;
 using CarPartBotApi.Application.Interfaces;
 using CarPartBotApi.Application.Services;
 using Microsoft.Extensions.Configuration;
@@ -39,14 +41,20 @@ public static class ApplicationBuilderExtensions
 
         services
             .AddScoped<ICommandHandler, StartCommandHandler>()
-            .AddScoped<ICommandHandler, HelpCommandHandler>();
+            .AddScoped<ICommandHandler, GetUsersCommandHandler>()
+            .AddScoped<ICommandHandler, HelpCommandHandler>()
+            .AddScoped<ICommandHandler, ListCarsCommandHandler>()
+            .AddScoped<ICommandHandler, AddCarCommandHandler>();
 
-        services.AddScoped<ICommandHandler, GetUsersCommandHandler>();
+        services.AddScoped<RemoveCarCommandHandler>();
+        services.AddScoped<ICommandHandler>(sp => sp.GetRequiredService<RemoveCarCommandHandler>());
+        services.AddScoped<ICallbackableHandler>(sp => sp.GetRequiredService<RemoveCarCommandHandler>());
 
         services.AddScoped<IFailureHandler, FailureHandler>();
 
         // Background.
         services.AddHostedService<TelegramWebhookRegistrationWorker>();
+        services.AddHostedService<BotMetadataUpdateWorker>();
 
         services
             .AddScoped<ITelegramWebhookEventDispatcher, TelegramWebhookEventDispatcher>()

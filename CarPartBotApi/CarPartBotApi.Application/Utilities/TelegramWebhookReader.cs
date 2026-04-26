@@ -45,10 +45,10 @@ public sealed class TelegramWebhookReader : ICommandDataReader
         }
     }
 
-    public string GetMessageText()
+    public string? GetMessageText()
     {
 
-        return _notification.Message!.Text!;
+        return _notification?.Message?.Text;
     }
 
     public bool HasCommands()
@@ -64,6 +64,11 @@ public sealed class TelegramWebhookReader : ICommandDataReader
         }
 
         var text = GetMessageText();
+
+        if (string.IsNullOrEmpty(text))
+        {
+            return [];
+        }
 
         var commandsCount = _notification.Message!.Entities!.Count(e => e.Type == MessageEntityTypes.BotCommand);
 
@@ -111,20 +116,49 @@ public sealed class TelegramWebhookReader : ICommandDataReader
 
     public UserContext ExtractUserContext()
     {
+        var user = _notification?.Message?.From ?? _notification?.CallbackQuery?.From;
+
+        ArgumentNullException.ThrowIfNull(user);
+
         return new UserContext
         {
-            TelegramId = _notification.Message!.From!.Id,
-            FirstName = _notification.Message!.From.FirstName,
-            LanguageCode = _notification.Message.From.LanguageCode ?? "en"
+            TelegramId = user.Id,
+            FirstName = user.FirstName,
+            LanguageCode = user.LanguageCode ?? "en"
         };
     }
 
     public ChatContext ExtractChatContext()
     {
+        var chat = _notification?.Message?.Chat ?? _notification?.CallbackQuery?.Message?.Chat;
+
+        ArgumentNullException.ThrowIfNull(chat);
+
         return new ChatContext
         {
-            Id = _notification.Message!.Chat.Id,
-            Type = _notification.Message.Chat.Type
+            Id = chat.Id,
+            Type = chat.Type
+        };
+    }
+
+    public TelegramCallbackQuery? GetCallbackQuery()
+    {
+        var callbackQuery = _notification?.CallbackQuery;
+
+        if (callbackQuery is null || callbackQuery.Data is null)
+        {
+            return null;
+        }
+
+        var parts = callbackQuery.Data.Split(':');
+
+        return new TelegramCallbackQuery 
+        { 
+            Id = callbackQuery.Id, 
+            Payload = new TelegramCallbackPayload 
+            { 
+                CommandName = parts[0], 
+                Payload = parts[1] }
         };
     }
 }

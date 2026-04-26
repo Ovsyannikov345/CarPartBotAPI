@@ -5,6 +5,8 @@ public sealed record TelegramWebhookNotificationDto
     public long UpdateId { get; init; }
 
     public MessageDto? Message { get; init; }
+
+    public CallbackQuery? CallbackQuery { get; init; }
 }
 
 public sealed record MessageDto
@@ -47,4 +49,20 @@ public sealed record MessageEntityDto
     public required int Offset { get; init; }
 
     public required int Length { get; init; }
+}
+
+public sealed record CallbackQuery
+{
+    public required string Id { get; init; }
+
+    public UserDto? From { get; init; }
+
+    public CallbackQueryMessage? Message { get; init; }
+
+    public string? Data { get; init; }
+}
+
+public sealed record CallbackQueryMessage
+{
+    public required ChatDto Chat { get; init; }
 }

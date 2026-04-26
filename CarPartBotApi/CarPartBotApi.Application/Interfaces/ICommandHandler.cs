@@ -1,4 +1,5 @@
-﻿using CarPartBotApi.Application.Dto;
+﻿using CarPartBotApi.Application.Constants.Enums;
+using CarPartBotApi.Application.Dto;
 using Utilities;
 
 namespace CarPartBotApi.Application.Interfaces;
@@ -9,7 +10,7 @@ public interface ICommandHandler
 
     public string CommandDescription { get; }
 
-    public bool AdminOnly { get; }
+    public CommandAccessLevel CommandAccessLevel { get; }
 
     public bool CanHandle(Command command);
 
