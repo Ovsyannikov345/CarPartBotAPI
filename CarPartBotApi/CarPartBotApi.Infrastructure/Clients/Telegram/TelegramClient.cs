@@ -51,6 +51,7 @@ public sealed class TelegramClient(
         {
             Url = webhookUrl,
             AllowedUpdates = [AllowedUpdateTypes.Message, AllowedUpdateTypes.CallbackQuery],
+            DropPendingUpdates = true,
             SecretToken = _telegramOptions.Value.Webhook.SecretToken,
             MaxConnections = _telegramOptions.Value.Webhook.MaxConnections
         };

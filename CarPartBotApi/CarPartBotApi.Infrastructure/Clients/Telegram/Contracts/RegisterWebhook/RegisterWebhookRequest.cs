@@ -8,5 +8,7 @@ internal sealed record RegisterWebhookRequest
 
     public required List<string>? AllowedUpdates { get; init; }
 
+    public bool? DropPendingUpdates { get; init; }
+
     public string? SecretToken { get; init; }
 }
